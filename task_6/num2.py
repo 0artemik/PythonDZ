@@ -1,53 +1,49 @@
-import math
 import pytest
-import os
 
-@pytest.fixture
-def testtwo_fixt():
-    f1 = "file1.txt"
-    f2 = "file2.txt"
-    out = "output.txt"
-
-    with open(f1, 'w') as file1:
-        file1.write("a ||")
-
-    with open(f2, 'w') as file2:
-        file2.write("|| b")
-
-    yield f1, f2, out
-
-    for file_path in [f1, f2, out]:
-        if os.path.exists(file_path):
-            os.remove(file_path)
-
-def merge_and_write(file1, file2, output):
+def merge_and_write(file1_path, file2_path, output_file_path):
     try:
-        with open(file1, 'r') as f1:
-            data1 = f1.read().strip()
+        with open(file1_path, 'r') as file1:
+            data1 = file1.read().strip()
 
-        with open(file2, 'r') as f2:
-            data2 = f2.read().strip()
+        with open(file2_path, 'r') as file2:
+            data2 = file2.read().strip()
 
         merged_data = data1 + ' ' + data2
 
-        with open(output, 'w') as out:
-            out.write(merged_data)
+        with open(output_file_path, 'w') as output_file:
+            output_file.write(merged_data)
 
-        with open(output, 'r') as out:
-            data = out.read()
+        with open(output_file_path, 'r') as output_file:
+            data = output_file.read()
         return data
     except FileNotFoundError:
-        return "Error not found ^)"
+        return "Один из файлов не найден"
 
-def test_merge_and_write(testtwo_fixt):
-    f1, f2, out = testtwo_fixt
 
-    expected_data = "a || || b"
-    assert merge_and_write(f1, f2, out) == expected_data
+@pytest.fixture
+def test_create_files(tmpdir):
+    file1 = tmpdir.join("file1.txt")
+    file2 = tmpdir.join("file2.txt")
+    output_file = tmpdir.join("output.txt")
+
+    file1.write("Some text 1")
+    file2.write("Some text 2")
+
+    return file1, file2, output_file
+
+def test_merge_and_write(test_create_files):
+    file1, file2, output_file = test_create_files
+    expected_data = "Some text 1 Some text 2"
+
+    result = merge_and_write(str(file1), str(file2), str(output_file))
+
+    assert result == expected_data
 
 def test_file_not_found():
-    f1 = "not.txt"
-    f2 = "file2.txt"
-    out = "output.txt"
+    file1_path = "nonexistent_file1.txt"
+    file2_path = "nonexistent_file2.txt"
+    output_file_path = "output.txt"
 
-    assert merge_and_write(f1, f2, out) == "Error not found ^)"
+    result = merge_and_write(file1_path, file2_path, output_file_path)
+
+    assert result == "Один из файлов не найден"

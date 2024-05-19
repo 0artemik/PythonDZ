@@ -1,46 +1,44 @@
 import unittest
 import sys
-from datetime import datetime
-import math
+import time
 
 def factorial(n: int):
     if n < 0:
-        raise ValueError("Error not found ^(")
+        raise ValueError("Факториал отрицательного числа не определен")
     if n == 0:
         return 1
     result = 1
     for i in range(1, n + 1):
         result *= i
         if result > sys.maxsize:
-            raise ValueError(f"Error")
+            raise ValueError(f"Факториал для {n} не поддерживается типом int")
     return result
 
 class TestFactorial(unittest.TestCase):
+    def test_factorial_positive(self):
+        self.assertEqual(factorial(5), 120)
 
-    def testone(self):
-        self.assertEqual(math.factorial(0), 1)
+    def test_factorial_zero(self):
+        self.assertEqual(factorial(0), 1)
 
-    def testtwo_pos(self):
-        self.assertEqual(math.factorial(3), 6)
-
-    def testthree_neg(self):
+    def test_factorial_negative(self):
         with self.assertRaises(ValueError):
-            math.factorial(-5)
+            factorial(-1)
 
-    def testfourlarge(self):
-        n = 100
-        expected_log_factorial = math.lgamma(n + 1)
-        actual_log_factorial = math.log(math.factorial(n))
+    def test_factorial_large_number(self):
+        with self.assertRaises(ValueError):
+            factorial(10000)
 
-        self.assertAlmostEqual(actual_log_factorial, expected_log_factorial, delta=1e-10)
+    def test_factorial_type_error(self):
+        with self.assertRaises(TypeError):
+            factorial('five')
 
-    def testfivelargeinput(self):
+    def test_factorial_float(self):
+        with self.assertRaises(TypeError):
+            factorial(5.5)
 
-        n = 3
-        self.assertEqual(math.factorial(n), 	6)
-
-if __name__ == "__main__":
-    start_time = datetime.now()
+if __name__ == '__main__':
+    start_time = time.time()
     unittest.main()
-    end_time = datetime.now()
-    print(f"Время выполнения тестов: {end_time - start_time}")
+    end_time = time.time()
+    print(f"Test execution time: {end_time - start_time} seconds")
